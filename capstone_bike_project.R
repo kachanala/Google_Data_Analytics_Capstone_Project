@@ -1,4 +1,3 @@
-setwd("C:/Kesava/R Files")
 # Load all packages required
 library(tidyverse)
 library(dplyr)
@@ -11,7 +10,7 @@ library(geosphere)
 directory <- "data_files/bike"
 file_names <- list.files(path = directory, full.names = TRUE)
 
-bike_data <- data.frame() #empty dataframe
+bike_data <- data.frame() #empty data frame
 for (file in file_names) {
   file.path <- file.path(directory, file)
   file_data <- read.csv(file.path)
@@ -22,19 +21,19 @@ for (file in file_names) {
 str(bike_data) 
 
 # Data Cleaning
-# Convert start_dt and end_dt to datetime format using fasttime
+# Convert start_dt and end_dt to datetime format using fast-time
 bike_data$started_at <- as.POSIXct(bike_data$started_at, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
 bike_data$ended_at <- as.POSIXct(bike_data$ended_at, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
 
-# Create a new dataframe with selected columns (or removing columns)
+# Create a new data frame with selected columns (or removing columns)
 trips_df <- bike_data
 trips_df <- subset(trips_df, select = -c(ride_id,start_station_id,end_station_id))
 
-# Check for null values column-wise in the bike_data dataframe
+# Check for null values column-wise in the bike_data data frame
 null_counts <- colSums(is.na(trips_df))
 print(null_counts) # found start_station_id and end_station_id, to be dealt later
 
-# check station name and lat, lag are the same, take any station name
+# check station name and lat, lag is the same, take any station name
 subset_df <- subset(trips_df, end_station_name == "Kosciuszko Park") #found that its same as per data
 
 # Find and replace missing end_lat,end_lag values in df
@@ -58,7 +57,7 @@ trips_df$Month <- month.abb[month(trips_df$started_at)]
 trips_df$Hour <- hour(trips_df$started_at)
 trips_df$Weekday <- weekdays(trips_df$started_at)
 
-# Remove unnecessary columns and move the subset to new dataframe
+# Remove unnecessary columns and move the subset to new data frame
 data_df <- subset(trips_df, select = -c(started_at, ended_at, start_lat, start_lng, end_lat, end_lng))
 
 # check data_df (the cleaned data for Analysis)
@@ -97,7 +96,7 @@ barplot(ride_counts, col = "red", ylim = c(0, max(ride_counts) * 1.1),
         xlab = "Member Type", ylab = "Ride Count", las = 1,
         names.arg = levels(data_df$member_casual))
 
-# Observation - Casual customers rides less, but trip duration is high, where is members trip duration is less and ride counts are higher
+# Observation - Casual customers ride less, but the trip duration is high, whereas is members trip duration is less and ride counts are higher
 
 data_df %>%
   mutate(Weekday = ifelse(Weekday %in% c("Monday", "Tuesday", "Wednesday", "Thursday"), "Weekday", "Weekend")) %>%
@@ -132,7 +131,7 @@ ggplot(ride_counts, aes(x = Hour, y = DayType, fill = rides)) +
   scale_fill_gradient(low = "lightblue", high = "darkblue") +
   theme_minimal()
 
-# Observation - there is no pattern on Casual, looks like members are using on weekdays for commute to work & after work exercise?
+# Observation - there is no pattern on Casual, looks like members are using it on weekdays for commuting to work & after-work exercise.
 
 ride_counts_month <- data_df %>%
   group_by(Month, member_casual) %>%
@@ -147,7 +146,7 @@ ggplot(ride_counts_month, aes(x = Month, y = total_rides, color = member_casual,
        color = "Member Type") +
   theme_minimal()
 
-# Observation - looks like bike riding is seasonal element
+# Observation - looks like bike riding is a seasonal element
 
 
 # Calculate the number of rides for each starting station and calculate the percentage
@@ -171,7 +170,7 @@ ggplot(ride_counts, aes(x = start_station_name, y = percentage)) +
   annotate("text", x = 8, y = mean(ride_counts$percentage), label = paste("Top Stations =", nrow(ride_counts)),
            color = "red", angle = 45, hjust = 0)
 
-# Observation - 37 out of 704 stations, identified more bike hiring, suggest run marketing in these stations
+# Observation - 37 out of 704 stations, identified more bike hiring
 
 
 
